@@ -10,6 +10,7 @@ export default function Home() {
 	const [videoId, setVideoId] = useState(null);
 	const [isGenerating, setIsGenerating] = useState(false);
 	const [error, setError] = useState('');
+	const [clip, setClip] = useState(null);
 
 	const extractVideoId = (url) => {
 		const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
@@ -52,13 +53,14 @@ export default function Home() {
 
 			const blob = await response.blob();
 			const url = window.URL.createObjectURL(blob);
-			const a = document.createElement('a');
-			a.href = url;
-			a.download = 'clip.mp4';
-			document.body.appendChild(a);
-			a.click();
-			window.URL.revokeObjectURL(url);
-			document.body.removeChild(a);
+			setClip(url);
+			// const a = document.createElement('a');
+			// a.href = url;
+			// a.download = 'clip.mp4';
+			// document.body.appendChild(a);
+			// a.click();
+			// window.URL.revokeObjectURL(url);
+			// document.body.removeChild(a);
 		} catch (err) {
 			setError(err.message);
 		} finally {
@@ -141,8 +143,8 @@ export default function Home() {
 								type="submit"
 								disabled={!isFormValid || isGenerating}
 								className={`px-8 py-4 rounded-lg font-medium text-white transition-all duration-200 ${isFormValid && !isGenerating
-										? 'bg-blue-600 hover:bg-blue-700 hover:scale-105'
-										: 'bg-gray-400 cursor-not-allowed'
+									? 'bg-blue-600 hover:bg-blue-700 hover:scale-105'
+									: 'bg-gray-400 cursor-not-allowed'
 									}`}
 							>
 								{isGenerating ? (
@@ -162,7 +164,7 @@ export default function Home() {
 				</div>
 
 				{videoId && (
-					<div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6">
+					<div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 mb-8">
 						<div className="aspect-w-16 aspect-h-9">
 							<iframe
 								src={`https://www.youtube.com/embed/${videoId}`}
@@ -171,6 +173,22 @@ export default function Home() {
 								allowFullScreen
 							/>
 						</div>
+					</div>
+				)}
+
+				{clip && (
+					<div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6">
+						<div className="flex justify-between items-center mb-4">
+							<h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+								Generated Clip
+							</h2>
+							<a href={clip} download="clip.mp4" className="text-blue-600 hover:underline">
+								<button className="px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer">
+									Download Clip
+								</button>
+							</a>
+						</div>
+						<video src={clip} controls />
 					</div>
 				)}
 			</div>

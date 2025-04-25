@@ -4,7 +4,6 @@ import { promisify } from 'util';
 import { unlink, readFile } from 'fs/promises';
 import { join } from 'path';
 import os from 'os';
-import { randomUUID } from 'crypto';
 
 const execAsync = promisify(exec);
 
@@ -16,12 +15,12 @@ function timeToSeconds(time) {
 export async function POST(req) {
     try {
         const { url, startTime, endTime } = await req.json();
-        const outputPath = join(os.tmpdir(), `${randomUUID()}.mp4`);
+        const outputPath = join(os.tmpdir(), `${Date.now()}.mp4`);
         
         const startSec = timeToSeconds(startTime);
         const duration = timeToSeconds(endTime) - startSec;
         
-        const cmd = `yt-dlp -f "bv*+ba/b" "${url}" -o - | ffmpeg -i pipe:0 -ss ${startSec} -t ${duration} -c copy "${outputPath}"`;
+        const cmd = `yt-dlp -f "bv*+ba/b" "${url}" -o - | ffmpeg -i pipe:0 -ss ${startSec} -t ${duration} -c:v libx264 -c:a aac -c copy "${outputPath}"`;
         await execAsync(cmd);
         
         const response = new NextResponse(await readFile(outputPath), {
